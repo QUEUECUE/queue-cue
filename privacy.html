@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Queue Cue privacy policy</title>
+  <style>
+    :root { --text: #1d1b2e; --muted: #5b5870; --bg: #ffffff; --accent: #5440ff; --rule: #e4e2ee; }
+    @media (prefers-color-scheme: dark) {
+      :root { --text: #ecebf5; --muted: #aeaac4; --bg: #17151f; --accent: #9d90ff; --rule: #34313f; }
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 1.7em; line-height: 1.25; margin: 0 0 4px; }
+    h2 { font-size: 1.15em; margin: 32px 0 6px; padding-top: 16px; border-top: 1px solid var(--rule); }
+    .updated { color: var(--muted); margin: 0 0 24px; }
+    a { color: var(--accent); }
+    ul { padding-left: 1.2em; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Queue Cue privacy policy</h1>
+  <p class="updated">Last updated: 22 October 2026</p>
+
+  <p>Queue Cue is a Chrome extension that tells you when a website's live-chat agent joins your chat or replies,
+  so you can leave the chat tab. It works with Tawk.to chat. This page explains exactly what it reads, keeps
+  and sends. In short: your chat messages never leave the page, nothing is sold or shared, and the only thing
+  ever sent anywhere is an optional phone alert that names the website.</p>
+
+  <h2>What Queue Cue reads</h2>
+  <ul>
+    <li><strong>Only on websites you choose.</strong> Queue Cue does nothing on a website until you click
+      "Watch chats on this site" in its menu and Chrome asks you to allow it. You can stop at any time with
+      "Stop watching this site".</li>
+    <li><strong>Chat events, not chat text.</strong> On a watched site, Queue Cue listens for the chat
+      widget's own signals: an agent joined, an agent replied, you sent a message, or the chat ended. It turns
+      each message (and, when an agent joins, the agent's ID or name) into a short code, a fingerprint, so it
+      can tell new messages from repeats. It passes on only the kind of event and that code. The words of
+      your chat are never stored, never passed to the rest of the extension and never sent anywhere.</li>
+    <li><strong>Which tab you are looking at.</strong> Queue Cue checks whether the chat tab is in front, so
+      it stays quiet while you are reading the chat and alerts you when you are elsewhere.</li>
+  </ul>
+
+  <h2>What Queue Cue keeps, and where</h2>
+  <p>Everything is kept by Chrome on your own computer. Queue Cue has no server and no account.</p>
+  <ul>
+    <li>The list of websites you chose to watch.</li>
+    <li>Your settings: whether phone alerts are on, your phone alert topic (a random name, see below) and
+      how soon to remind you.</li>
+    <li>While Chrome is open: short-lived working notes, such as which tab a notification should open,
+      when the last phone alert was sent, and the message fingerprints described above. Chrome deletes these
+      when it closes.</li>
+  </ul>
+
+  <h2>What Queue Cue sends</h2>
+  <p>Nothing, unless you turn on phone alerts in Queue Cue's settings (they are off until you do) or click
+  "Send test alert" there.</p>
+  <p>With phone alerts on, each alert sends a short message to <a href="https://ntfy.sh">ntfy.sh</a>, a free
+  notification service, which passes it to the ntfy app on your phone. The message is only one of these:
+  "Agent joined on [website]", "Agent replied on [website]" or "Reminder: the agent on [website] is
+  waiting for you", with the title "Queue Cue". [website] is the website's address, for example
+  example.com. "Send test alert" sends "Test alert from Queue Cue. Phone alerts are working." the same
+  way, even while phone alerts are off. None of these ever contains your chat messages, your name or
+  anything you typed.</p>
+  <ul>
+    <li>Alerts go to a random topic name made on your computer when Queue Cue was installed. Anyone who
+      knows the topic can read its alerts, so keep it private, the same as a password.</li>
+    <li>ntfy.sh keeps messages for about 12 hours and keeps server logs that include topic names and
+      internet (IP) addresses. To reach your phone, alerts may pass through Google's or Apple's notification
+      services. See <a href="https://docs.ntfy.sh/privacy/">ntfy.sh's privacy policy</a>.</li>
+  </ul>
+  <p>Queue Cue makes no other internet connections. It has no analytics, no tracking and no ads, and it
+  doesn't load code from the internet.</p>
+
+  <h2>Sharing</h2>
+  <p>Queue Cue doesn't sell, rent or share your information with anyone. The only other party involved is
+  ntfy.sh, and only for the phone alerts you turned on, as described above.</p>
+
+  <h2>Limited Use</h2>
+  <p>Queue Cue's use of the information described here complies with the
+  Chrome Web Store User Data Policy, including its
+  <a href="https://developer.chrome.com/docs/webstore/program-policies/limited-use">Limited Use</a>
+  requirements. Information is used only to give you Queue Cue's
+  chat alerts. It is never used for advertising, never sold, never used to decide on credit or lending,
+  and nobody reads it.</p>
+
+  <h2>Your choices and deleting your data</h2>
+  <ul>
+    <li>"Stop watching this site" in Queue Cue's menu removes that website and its access.</li>
+    <li>Turning phone alerts off in the settings stops alerts being sent (a test alert is only sent when you click "Send test alert").</li>
+    <li>Removing Queue Cue from Chrome deletes everything it kept on your computer.</li>
+  </ul>
+
+  <h2>Changes to this policy</h2>
+  <p>If what Queue Cue reads, keeps or sends ever changes, this page will be updated first, with a new date
+  at the top, and the change will be described in the Chrome Web Store listing's release notes.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about privacy: open an issue on
+  <a href="https://github.com/queuecue/queue-cue/issues">Queue Cue's GitHub page</a>.</p>
+
+  <p>Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Queue Cue demo chat</title>
+  <style>
+    :root { --text: #1d1b2e; --muted: #5b5870; --bg: #ffffff; --panel: #f4f3fa; --line: #d9d6ea; --accent: #5440ff; --on-accent: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      :root { --text: #ecebf5; --muted: #aeaac4; --bg: #17151f; --panel: #221f2e; --line: #3a3650; --accent: #9d90ff; --on-accent: #17151f; }
+    }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 1.7em; margin: 0 0 8px; }
+    h2 { font-size: 1.15em; margin: 28px 0 8px; }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    ol { padding-left: 1.3em; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    button { font: inherit; font-size: 0.95em; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer; }
+    button.secondary { background: transparent; color: var(--accent); }
+    button:disabled { opacity: 0.5; cursor: default; }
+    #countdown { min-height: 1.6em; font-weight: 600; }
+    #chat { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 12px 14px; }
+    #chat-status { font-size: 0.85em; color: var(--muted); margin-bottom: 6px; }
+    .line { margin: 2px 0; }
+    .line b { font-weight: 600; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Queue Cue demo chat</h1>
+  <p>This page pretends to be a website with a Tawk.to live chat, so you can see Queue Cue's alerts without
+  waiting for a real agent. The buttons play the part of the agent. Nothing here is sent anywhere: the
+  chat lines are made up, and only this browser keeps them.</p>
+
+  <h2>How to try it</h2>
+  <ol>
+    <li>Install Queue Cue. On this page, click the Queue Cue icon in Chrome's toolbar (if you don't see it,
+      click the jigsaw-piece Extensions button first), click <strong>Watch chats on this site</strong>,
+      allow access, then <strong>refresh this page</strong>.</li>
+    <li>Click <strong>Agent replies in 10 seconds</strong>, then switch to another tab before the countdown
+      ends. A notification "Agent replied on <span class="site-name">this website</span>" appears. Click it
+      to come back here.</li>
+    <li>Try the same while you stay on this tab: no notification, because you're already looking at the chat.</li>
+    <li>If you get a notification and don't come back, Queue Cue reminds you once a few minutes later (the
+      time is in Queue Cue's settings). Coming back means clicking the notification, switching to this tab
+      from another tab, or clicking <strong>Send a message as you</strong>.</li>
+    <li>Click <strong>End chat</strong> when you're done, so Queue Cue stops keeping the computer awake.</li>
+  </ol>
+  <p class="muted">No notification? Check that your computer lets Chrome show notifications (Do Not Disturb or
+  Focus can hide them).</p>
+
+  <div class="buttons">
+    <button id="agent-reply" type="button">Agent replies in 10 seconds</button>
+    <button id="agent-join" type="button" class="secondary">Agent joins in 10 seconds</button>
+    <button id="visitor-message" type="button" class="secondary">Send a message as you</button>
+    <button id="end-chat" type="button" class="secondary">End chat</button>
+    <button id="start-over" type="button" class="secondary">Start over</button>
+  </div>
+  <p id="countdown"></p>
+  <p id="announce" class="visually-hidden" aria-live="polite"></p>
+
+  <div id="chat">
+    <div id="chat-status">Demo chat (loading)</div>
+    <div id="chat-lines" role="log" aria-label="Demo chat messages"></div>
+  </div>
+
+  <p class="muted">Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to.
+  <a href="./">Queue Cue home</a> · <a href="privacy.html">Privacy policy</a></p>
+</main>
+
+<script>
+// Imitates the signals a real Tawk.to chat widget sends on the page: each is a "tawk..." event on window,
+// carrying what Tawk.to's own callbacks get. Queue Cue's Tawk.to detector listens for exactly these.
+// Load order as the real widget: tawkBeforeLoad, tawkStatusChange, tawkChatStarted (only if a chat is
+// going), then tawkLoad. After a refresh, old lines are shown again but not sent again, like the real widget.
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'queueCueDemoChat';
+  var AGENT = { name: 'Demo Agent', position: '', image: '', id: 'queuecuedemoagent0000001' };
+  // ?seconds=N (1 to 60) changes the countdown; the automated tests use it. The default is 10.
+  var requested = Number(new URLSearchParams(location.search).get('seconds'));
+  var SECONDS = requested >= 1 && requested <= 60 ? Math.round(requested) : 10;
+
+  var loaded = false;
+  var timer = null;
+  var storageWorks = true;
+
+  Array.prototype.forEach.call(document.querySelectorAll('.site-name'), function (el) {
+    if (location.hostname) el.textContent = location.hostname;
+  });
+
+  function send(name, detail) {
+    window.dispatchEvent(new CustomEvent('tawk' + name, { detail: detail === undefined ? null : detail }));
+  }
+
+  // The chat as saved, or null if there's none (or what's saved isn't a chat this page wrote).
+  function load() {
+    var raw;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      storageWorks = false; // A private window may refuse: keep going in memory.
+      return null;
+    }
+    var saved;
+    try { saved = JSON.parse(raw); } catch (e) { return null; }
+    var ok = saved && typeof saved === 'object' && typeof saved.chatId === 'string' && Array.isArray(saved.lines) &&
+      saved.lines.every(function (l) { return l && typeof l.from === 'string' && typeof l.text === 'string'; });
+    return ok ? saved : null;
+  }
+  function save() {
+    try {
+      if (chat) localStorage.setItem(STORAGE_KEY, JSON.stringify(chat));
+      else localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      storageWorks = false; // A private window may refuse: keep going in memory.
+    }
+  }
+  // Before each change, pick up what another tab of this page may have saved, so two tabs share one chat.
+  function refresh() {
+    if (storageWorks) chat = load();
+  }
+  var chat = load();
+  function going() { return chat && !chat.ended ? chat : null; }
+
+  // What the chat box shows now, so new lines can be added without rebuilding the old ones (the box is a
+  // screen reader "log": it reads out what's added, and a rebuild would read the whole chat again).
+  var shown = { chatId: null, count: 0 };
+
+  function lineElement(line) {
+    var div = document.createElement('div');
+    div.className = 'line';
+    div.dataset.from = line.from;
+    if (line.from !== 'note') {
+      var who = document.createElement('b');
+      who.textContent = (line.from === 'agent' ? AGENT.name : 'You') + ': ';
+      div.appendChild(who);
+    }
+    div.appendChild(document.createTextNode(line.text));
+    return div;
+  }
+
+  function render() {
+    document.getElementById('chat-status').textContent =
+      'Demo chat (' + (!loaded ? 'loading' : going() ? 'chat going' : chat && chat.ended ? 'chat ended' : 'online') + ')';
+    var box = document.getElementById('chat-lines');
+    var lines = chat ? chat.lines : [];
+    if (lines.length && shown.chatId === chat.chatId && shown.count > 0 && shown.count <= lines.length) {
+      lines.slice(shown.count).forEach(function (line) { box.appendChild(lineElement(line)); });
+    } else {
+      box.textContent = '';
+      lines.forEach(function (line) { box.appendChild(lineElement(line)); });
+      if (!lines.length) box.textContent = 'No messages yet.';
+    }
+    shown = { chatId: chat ? chat.chatId : null, count: lines.length };
+  }
+
+  function visitorMessage(text) {
+    refresh();
+    var startedNow = !going();
+    if (startedNow) chat = { chatId: 'demo-' + Date.now(), ended: false, agentReplies: 0, visitorMessages: 0, lines: [] };
+    chat.visitorMessages = (chat.visitorMessages || 0) + 1;
+    text = text || 'Hello, are you there? (' + chat.visitorMessages + ')';
+    chat.lines.push({ from: 'visitor', text: text });
+    save();
+    render();
+    send('ChatMessageVisitor', { message: text, attachments: [] });
+    if (startedNow) send('ChatStarted', { chatId: chat.chatId });
+  }
+
+  function agentJoin() {
+    refresh();
+    if (!going()) visitorMessage('Hello');
+    chat.lines.push({ from: 'note', text: AGENT.name + ' joined the chat.' });
+    save();
+    render();
+    send('AgentJoinChat', Object.assign({}, AGENT));
+  }
+
+  function agentReply() {
+    refresh();
+    if (!going()) visitorMessage('Hello');
+    chat.agentReplies = (chat.agentReplies || 0) + 1;
+    var text = 'Thanks for waiting. How can I help? (reply ' + chat.agentReplies + ')';
+    chat.lines.push({ from: 'agent', text: text });
+    save();
+    render();
+    send('ChatMessageAgent', { message: text, attachments: [] });
+  }
+
+  function endChat() {
+    stopCountdown('', '');
+    refresh();
+    if (!going()) { render(); return; }
+    chat.ended = true;
+    chat.lines.push({ from: 'note', text: 'Chat ended.' });
+    save();
+    render();
+    send('ChatEnded');
+  }
+
+  // Ends a chat that's still going first, so Queue Cue doesn't keep the computer awake for it.
+  function startOver() {
+    endChat();
+    chat = null;
+    save();
+    render();
+  }
+
+  function stopCountdown(shown, spoken) {
+    if (timer) clearInterval(timer);
+    timer = null;
+    document.getElementById('countdown').textContent = shown;
+    document.getElementById('announce').textContent = spoken;
+    setButtons(false);
+  }
+
+  function setButtons(waiting) {
+    document.getElementById('agent-reply').disabled = waiting;
+    document.getElementById('agent-join').disabled = waiting;
+  }
+
+  // The agent acts after a countdown, so there's time to look away from the chat first. Screen readers
+  // hear the start and the end, not every second.
+  function later(what, action) {
+    if (!loaded || timer) return;
+    if (!going()) visitorMessage('Hello');
+    var left = SECONDS;
+    var note = document.getElementById('countdown');
+    function show() { note.textContent = 'The agent ' + what + ' in ' + left + ' s. Switch to another tab now.'; }
+    setButtons(true);
+    show();
+    document.getElementById('announce').textContent = 'The agent ' + what + ' in ' + SECONDS + ' seconds.';
+    timer = setInterval(function () {
+      left -= 1;
+      if (left > 0) { show(); return; }
+      stopCountdown('Done. Did Queue Cue alert you?', 'The agent ' + what + '.');
+      action();
+    }, 1000);
+  }
+
+  document.getElementById('agent-reply').addEventListener('click', function () { later('replies', agentReply); });
+  document.getElementById('agent-join').addEventListener('click', function () { later('joins', agentJoin); });
+  document.getElementById('visitor-message').addEventListener('click', function () { if (loaded) visitorMessage(); });
+  document.getElementById('end-chat').addEventListener('click', endChat);
+  document.getElementById('start-over').addEventListener('click', startOver);
+
+  render();
+  setTimeout(function () {
+    send('BeforeLoad');
+    send('StatusChange', 'online');
+    if (going()) send('ChatStarted', { chatId: chat.chatId });
+    setTimeout(function () {
+      loaded = true;
+      render();
+      send('Load');
+    }, 150);
+  }, 20);
+})();
+</script>
+</body>
+</html>
