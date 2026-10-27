@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4SaglJDcNp+lw/gEE16LJtFcvofkS3FtNcfNCFIgvlU='; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Queue Cue phone setup</title>
+  <style>
+    :root { --text: #1d1b2e; --muted: #5b5870; --bg: #ffffff; --accent: #5440ff; --box: #f1f0f7; }
+    @media (prefers-color-scheme: dark) {
+      :root { --text: #ecebf5; --muted: #aeaac4; --bg: #17151f; --accent: #9d90ff; --box: #24212f; }
+    }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 680px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 1.7em; line-height: 1.25; margin: 0 0 8px; }
+    h2 { font-size: 1.15em; margin: 28px 0 6px; }
+    a { color: var(--accent); }
+    ol { padding-left: 1.4em; }
+    li { margin: 6px 0; }
+    .label { font-weight: 600; margin: 24px 0 4px; }
+    .topic { margin: 0 0 12px; padding: 12px 14px; border-radius: 8px; background: var(--box);
+      font: 18px/1.5 ui-monospace, Menlo, Consolas, monospace; word-break: break-all;
+      -webkit-user-select: all; user-select: all; }
+    .button { display: inline-block; padding: 12px 20px; border: 0; border-radius: 8px; background: var(--accent);
+      color: var(--bg); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+    .note { color: var(--muted); font-size: 15px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Queue Cue phone setup</h1>
+  <p>Add your Queue Cue topic to the free ntfy app, and Queue Cue's alerts reach this phone.</p>
+
+  <section id="ready" hidden>
+    <p class="label">Your topic</p>
+    <p id="topic" class="topic"></p>
+    <button id="copy" class="button" type="button">Copy topic</button>
+    <p id="copy-status" class="note" role="status" aria-live="polite"></p>
+
+    <div id="android" hidden>
+      <h2>On Android</h2>
+      <p><a id="open-app" class="button">Open in the ntfy app</a></p>
+      <p>The app subscribes to your topic straight away. If ntfy isn't installed yet, the button opens it on
+      Google Play: install it, then come back and tap the button again.</p>
+    </div>
+
+    <h2 id="steps-heading">Add it in the ntfy app</h2>
+    <ol>
+      <li>Install the ntfy app if you haven't yet:
+        <a href="https://apps.apple.com/us/app/ntfy/id1625396347">App Store</a> or
+        <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">Google Play</a>.</li>
+      <li>Tap <strong>Copy topic</strong> above.</li>
+      <li>Open ntfy and tap <strong>+</strong>.</li>
+      <li>Paste the topic as the topic name, leave "Use another server" off, and tap <strong>Subscribe</strong>.</li>
+      <li>On your computer, click <strong>Send test alert</strong> in Queue Cue's settings. It should arrive on
+        this phone within a few seconds.</li>
+    </ol>
+    <p class="note">Keep your topic private: anyone who knows it can read your alerts.</p>
+  </section>
+
+  <section id="broken" hidden>
+    <p><strong>This link is incomplete.</strong> On your computer, open Queue Cue's settings (right-click the
+    Queue Cue icon in Chrome, then Options) and scan the code there again.</p>
+  </section>
+
+  <noscript>
+    <p><strong>This page needs JavaScript to read your topic from the link.</strong> Instead, copy the topic
+    from Queue Cue's settings on your computer.</p>
+  </noscript>
+
+  <p class="note">Your topic is only in this page's address, after the #. Browsers never send that part to the
+  website, and this page saves nothing and sends nothing. <a href="privacy.html">Privacy policy</a></p>
+</main>
+<script>
+  // Shows the topic from the address (#queuecue-...). The page's security rules (the meta tag above) let only
+  // this exact script run, and block every connection, so the topic can't leave the phone from here.
+  // Any change to this script changes its sha256, which must then be updated in that meta tag.
+  (function () {
+    'use strict';
+    // Queue Cue topics are "queuecue-" plus a random ID.
+    var TOPIC = /^queuecue-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    var GOOGLE_PLAY = 'https://play.google.com/store/apps/details?id=io.heckel.ntfy';
+
+    var ready = document.getElementById('ready');
+    var broken = document.getElementById('broken');
+    var topicEl = document.getElementById('topic');
+    var copyButton = document.getElementById('copy');
+    var copyStatus = document.getElementById('copy-status');
+    var android = document.getElementById('android');
+    var openApp = document.getElementById('open-app');
+    var stepsHeading = document.getElementById('steps-heading');
+
+    function show() {
+      var topic = location.hash.slice(1);
+      var ok = TOPIC.test(topic);
+      ready.hidden = !ok;
+      broken.hidden = ok;
+      topicEl.textContent = ok ? topic : '';
+      copyStatus.textContent = '';
+      // Only the Android ntfy app opens links. This is Chrome's link form for opening an app, with Google
+      // Play as the fallback if it isn't installed.
+      var onAndroid = ok && /Android/i.test(navigator.userAgent);
+      android.hidden = !onAndroid;
+      stepsHeading.textContent = onAndroid ? 'Or add it yourself' : 'Add it in the ntfy app';
+      if (onAndroid) {
+        openApp.href = 'intent://ntfy.sh/' + topic + '#Intent;scheme=ntfy;package=io.heckel.ntfy;S.browser_fallback_url=' +
+          encodeURIComponent(GOOGLE_PLAY) + ';end';
+      } else {
+        openApp.removeAttribute('href');
+      }
+    }
+
+    copyButton.addEventListener('click', function () {
+      // Safari only allows copying straight away in the tap, so writeText comes first.
+      var copying;
+      try {
+        copying = navigator.clipboard.writeText(topicEl.textContent);
+      } catch (error) {
+        copying = Promise.reject(error);
+      }
+      copying.then(function () {
+        copyStatus.textContent = 'Copied. Now open ntfy and tap +.';
+      }, function () {
+        window.getSelection().selectAllChildren(topicEl);
+        copyStatus.textContent = 'Couldn\'t copy it here. The topic is selected: press and hold it, then tap Copy.';
+      });
+    });
+
+    window.addEventListener('hashchange', show);
+    show();
+  })();
+</script>
+</body>
+</html>
