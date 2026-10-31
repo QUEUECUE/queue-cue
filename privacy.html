@@ -22,7 +22,7 @@
 <body>
 <main>
   <h1>Queue Cue privacy policy</h1>
-  <p class="updated">Last updated: 27 October 2026</p>
+  <p class="updated">Last updated: 31 October 2026</p>
 
   <p>Queue Cue is a Chrome extension that tells you when a website's live-chat agent joins your chat or replies,
   so you can leave the chat tab. It works with Tawk.to chat. This page explains exactly what it reads, keeps
@@ -41,6 +41,10 @@
       your chat are never stored, never passed to the rest of the extension and never sent anywhere.</li>
     <li><strong>Which tab you are looking at.</strong> Queue Cue checks whether the chat tab is in front, so
       it stays quiet while you are reading the chat and alerts you when you are elsewhere.</li>
+    <li><strong>Whether the computer is in use.</strong> When an agent replies while the chat tab is in
+      front, Queue Cue asks Chrome whether the computer has been used in the last minute or so (the time
+      you chose in the settings), or is locked. Chrome answers only "in use", "not in use" or "locked",
+      never what you did. Queue Cue uses the answer to decide on that one alert and doesn't keep it.</li>
   </ul>
 
   <h2>What Queue Cue keeps, and where</h2>
@@ -48,7 +52,7 @@
   <ul>
     <li>The list of websites you chose to watch.</li>
     <li>Your settings: whether phone alerts are on, your phone alert topic (a random name, see below) and
-      how soon to remind you.</li>
+      how soon to remind you, and how long without using the computer counts as away.</li>
     <li>While Chrome is open: short-lived working notes, such as which tab a notification should open,
       when the last phone alert was sent, and the message fingerprints described above. Chrome deletes these
       when it closes.</li>
