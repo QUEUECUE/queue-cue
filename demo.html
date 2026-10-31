@@ -40,7 +40,7 @@
     <li><a href="https://chromewebstore.google.com/detail/queue-cue/joieplfnnfhnceipgjohblanbhmhhpmb">Install Queue Cue</a> from the Chrome Web Store. On this page, click the Queue Cue icon in Chrome's toolbar (if you don't see it,
       click the jigsaw-piece Extensions button first), click <strong>Watch chats on this site</strong>,
       allow access, then <strong>refresh this page</strong>.</li>
-    <li>Click <strong>Agent replies in 10 seconds</strong>, then switch to another tab before the countdown
+    <li>Click <strong class="reply-label">Agent replies in 10 seconds</strong>, then switch to another tab before the countdown
       ends. A notification "Agent replied on <span class="site-name">this website</span>" appears. Click it
       to come back here.</li>
     <li>Try the same while you stay on this tab: no notification, because you're already looking at the chat.</li>
@@ -84,6 +84,13 @@
   // ?seconds=N (1 to 60) changes the countdown; the automated tests use it. The default is 10.
   var requested = Number(new URLSearchParams(location.search).get('seconds'));
   var SECONDS = requested >= 1 && requested <= 60 ? Math.round(requested) : 10;
+  // The labels in the page say 10 seconds; with a different countdown, say that instead.
+  if (SECONDS !== 10) {
+    var inTime = ' in ' + SECONDS + (SECONDS === 1 ? ' second' : ' seconds');
+    document.getElementById('agent-reply').textContent = 'Agent replies' + inTime;
+    document.getElementById('agent-join').textContent = 'Agent joins' + inTime;
+    document.querySelectorAll('.reply-label').forEach(function (el) { el.textContent = 'Agent replies' + inTime; });
+  }
 
   var loaded = false;
   var timer = null;
