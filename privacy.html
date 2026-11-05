@@ -22,10 +22,10 @@
 <body>
 <main>
   <h1>Queue Cue privacy policy</h1>
-  <p class="updated">Last updated: 1 November 2026</p>
+  <p class="updated">Last updated: 5 November 2026</p>
 
   <p>Queue Cue is a Chrome extension that tells you when a website's live-chat agent joins your chat or replies,
-  so you can leave the chat tab. It works with Tawk.to chat. This page explains exactly what it reads, keeps
+  so you can leave the chat tab. It works with Tawk.to and Zendesk chat. This page explains exactly what it reads, keeps
   and sends. In short: your chat messages never leave the page, nothing is sold or shared, and the only thing
   ever sent anywhere is an optional phone alert that names the website.</p>
 
@@ -37,7 +37,10 @@
     <li><strong>Chat events, not chat text.</strong> On a watched site, Queue Cue listens for the chat
       widget's own signals: an agent joined, an agent replied, you sent a message, or the chat ended. It turns
       each message (and, when an agent joins, the agent's ID or name) into a short code, a fingerprint, so it
-      can tell new messages from repeats. It passes on only the kind of event and that code. The words of
+      can tell new messages from repeats. On Zendesk chats it only hears that a message arrived, who sent it
+      (you, the agent or the chat's bot), when it arrived, the message's ID number and the conversation's ID number,
+      never its words. The fingerprint is made from those ID numbers (for your own messages, sometimes from the
+      conversation's ID and how many messages you have sent in it). It passes on only the kind of event and that code. The words of
       your chat are never stored, never passed to the rest of the extension and never sent anywhere.</li>
     <li><strong>Which tab you are looking at.</strong> Queue Cue checks whether the chat tab is in front, so
       it stays quiet while you are reading the chat and alerts you when you are elsewhere.</li>
@@ -117,7 +120,7 @@
   <p>Questions about privacy: open an issue on
   <a href="https://github.com/queuecue/queue-cue/issues">Queue Cue's GitHub page</a>.</p>
 
-  <p>Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to.</p>
+  <p>Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to or Zendesk.</p>
 </main>
 </body>
 </html>

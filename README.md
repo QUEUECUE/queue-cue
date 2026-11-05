@@ -1,7 +1,7 @@
 # Queue Cue
 
 A Chrome extension that tells you when a website's live-chat agent joins your chat or replies, so you can
-leave the chat tab and get on with other things. Works with websites that use Tawk.to chat.
+leave the chat tab and get on with other things. Works with websites whose chat uses Tawk.to or Zendesk.
 
 - Install: https://chromewebstore.google.com/detail/queue-cue/joieplfnnfhnceipgjohblanbhmhhpmb
 - Website: https://queuecue.github.io/queue-cue/
@@ -11,6 +11,6 @@ leave the chat tab and get on with other things. Works with websites that use Ta
 
 This project holds Queue Cue's website only.
 
-Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to.
+Queue Cue is an independent project, not affiliated with or endorsed by Tawk.to or Zendesk.
 
 Copyright © 2026 Queue Cue. All rights reserved. See [LICENSE](LICENSE).
